@@ -1,0 +1,66 @@
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+
+.transition-all { 
+    transition: all 0.3s ease-in-out; 
+}
+
+/* Estilo específico para el cuadro de datos del perfil */
+#profile-data {
+    white-space: pre-wrap;
+}
+
+/* Animaciones para las tabs */
+.tab-button {
+    transition: all 0.2s ease-in-out;
+}
+
+.tab-button:hover {
+    background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* Estilos para la tabla de usuarios */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+
+/* Animaciones de modales */
+#role-modal > div,
+#delete-modal > div {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejoras de accesibilidad */
+button:focus {
+    outline: 2px solid rgba(99, 102, 241, 0.5);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    table {
+        font-size: 0.875rem;
+    }
+    
+    .px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}

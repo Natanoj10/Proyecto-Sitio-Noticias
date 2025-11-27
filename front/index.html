@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth App Frontend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="applogin.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Contenedor Principal de la Aplicación -->
+    <div id="app-container" class="w-full max-w-6xl bg-white shadow-xl rounded-xl p-8 transition-all">
+        
+        <!-- Mensajes de Alerta -->
+        <div id="message-box" class="hidden p-3 mb-4 rounded-lg font-medium text-sm text-center"></div>
+
+        <!-- VISTA DE AUTENTICACIÓN (Login/Registro) -->
+        <div id="auth-view">
+            <h1 id="auth-title" class="text-3xl font-bold mb-6 text-center text-gray-800">Iniciar Sesión</h1>
+            
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                </div>
+                
+                <button type="submit" id="submit-btn" class="w-full py-2 px-4 border border-transparent rounded-lg shadow-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-semibold transition-all">
+                    Entrar
+                </button>
+            </form>
+
+            <p class="mt-6 text-center text-sm">
+                ¿No tienes cuenta? 
+                <button id="toggle-auth" class="text-indigo-600 hover:text-indigo-800 font-medium transition-all focus:outline-none">Regístrate aquí</button>
+            </p>
+        </div>
+
+        <!-- VISTA DE PERFIL (Protegida) -->
+        <div id="profile-view" class="hidden">
+            <!-- Header con Navegación -->
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Bienvenido, <span id="user-email-display"></span></h1>
+                    <p class="text-lg text-gray-600">Tu rol es: <span id="user-role-display" class="font-semibold text-indigo-600"></span></p>
+                </div>
+                <button id="logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all">
+                    Cerrar Sesión
+                </button>
+            </div>
+
+            <!-- Tabs de Navegación (Solo si es Admin) -->
+            <div id="admin-tabs" class="hidden mb-6">
+                <div class="flex space-x-2 border-b">
+                    <button id="tab-profile" class="tab-button px-4 py-2 font-medium text-gray-600 hover:text-indigo-600 border-b-2 border-transparent transition-all">
+                        Mi Perfil
+                    </button>
+                    <button id="tab-admin" class="tab-button px-4 py-2 font-medium text-gray-600 hover:text-indigo-600 border-b-2 border-transparent transition-all">
+                        Gestión de Usuarios
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: MI PERFIL -->
+            <div id="section-profile" class="tab-content">
+                <div class="text-center">
+                    <button id="fetch-profile-btn" class="py-2 px-4 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition-all">
+                        Verificar Perfil (Ruta Protegida)
+                    </button>
+                    <pre id="profile-data" class="mt-6 p-4 text-left bg-gray-50 border border-gray-200 rounded-lg text-sm overflow-auto text-gray-700"></pre>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Admin) -->
+            <div id="section-admin" class="tab-content hidden">
+                <div class="mb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
+                    <button id="refresh-users-btn" class="py-2 px-4 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all">
+                        🔄 Actualizar Lista
+                    </button>
+                </div>
+
+                <!-- Tabla de Usuarios -->
+                <div id="users-table-container" class="overflow-x-auto">
+                    <p class="text-center text-gray-500 py-8">Cargando usuarios...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Cambiar Rol -->
+    <div id="role-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Cambiar Rol de Usuario</h3>
+            <p class="mb-4 text-gray-600">Usuario: <span id="modal-user-email" class="font-semibold"></span></p>
+            
+            <div class="mb-4">
+                <label for="modal-new-role" class="block text-sm font-medium text-gray-700 mb-2">Nuevo Rol:</label>
+                <select id="modal-new-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="user">Usuario</option>
+                    <option value="editor">Editor</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+
+            <div class="flex space-x-3">
+                <button id="confirm-role-change" class="flex-1 py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all">
+                    Confirmar
+                </button>
+                <button id="cancel-role-change" class="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-all">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4 text-red-600">⚠️ Confirmar Eliminación</h3>
+            <p class="mb-4 text-gray-600">¿Estás seguro de que deseas eliminar al usuario <span id="modal-delete-email" class="font-semibold"></span>?</p>
+            <p class="mb-6 text-sm text-gray-500">Esta acción no se puede deshacer.</p>
+
+            <div class="flex space-x-3">
+                <button id="confirm-delete" class="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
+                    Eliminar
+                </button>
+                <button id="cancel-delete" class="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-all">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="applogin.js"></script>
+</body>
+</html>

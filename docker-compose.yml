@@ -1,0 +1,75 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: my-mongodb-container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+    networks:
+      - my-backend-net
+    volumes:
+      - mongodb:/data/db
+  
+  redisdb:
+    image: redis:7.2-alpine
+    command: redis-server --maxmemory 100mb --maxmemory-policy volatile-lfu
+    container_name: my-redis-container
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}" 
+    networks:
+      - my-backend-net
+    # depends_on:
+    #   - mongodb
+
+  cassandra:
+    image: cassandra:latest
+    container_name: my-cassandra-container
+    restart: always
+    ports:
+      - "9042:9042"
+    networks:
+      - my-backend-net
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+
+  backend:
+    build: 
+      context: ./back
+      dockerfile: dockerfile
+    container_name: my-backend-container
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}" 
+    networks:
+      - my-backend-net
+    depends_on:
+      - mongodb
+      - redisdb
+    volumes:
+      - ./back:/usr/src/app
+      - /usr/src/app/node_modules
+  frontend:
+    build:
+      context: ./front
+      dockerfile: dockerfile
+    container_name: my-frontend-container
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - my-backend-net
+    depends_on:
+      - backend
+
+networks:
+  my-backend-net:
+    driver: bridge
+
+volumes:
+  mongodb:
+  redis-data:
+  cassandra-data:
