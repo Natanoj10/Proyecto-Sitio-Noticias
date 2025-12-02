@@ -1,0 +1,13 @@
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/**",
+    "src/scripts/startup.sh",
+    "src/scripts/init-cassandra.sh"
+  ],
+  "exec": "node src/index.js",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

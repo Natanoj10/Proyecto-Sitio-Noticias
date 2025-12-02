@@ -1,0 +1,15 @@
+services:
+  backend:
+    build: 
+      context: ./back
+      dockerfile: dockerfile.dev
+    volumes:
+      - ./back:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+  
+  frontend:
+    volumes:
+      - ./front:/usr/share/nginx/html:ro

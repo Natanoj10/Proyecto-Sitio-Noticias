@@ -9,7 +9,7 @@ const redisClient = createClient({
 
 
 redisClient.on('error', (error) => {
-  console.error('❌ Error en el cliente de Redis:', error);
+  console.error('Error en el cliente de Redis:', error);
 });
 
 // 3. Variable para saber si la primera conexión fue exitosa.
@@ -23,11 +23,10 @@ export const connectToRedis = async () => {
   }
   try {
     await redisClient.connect();
-    console.log('✅ Cliente de Redis conectado exitosamente.');
+    console.log('Cliente de Redis conectado exitosamente.');
     isConnected = true;
   } catch (error) {
-    console.error('❌ No se pudo conectar con el servidor de Redis.');
-    // En un caso real, podrías querer que la aplicación se detenga si Redis es crítico.
+    console.error('No se pudo conectar con el servidor de Redis.');
     process.exit(1);
   }
 };

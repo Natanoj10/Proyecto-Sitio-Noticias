@@ -8,6 +8,9 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY index.html /usr/share/nginx/html/
 COPY applogin.css /usr/share/nginx/html/
 COPY applogin.js /usr/share/nginx/html/
+COPY news.html /usr/share/nginx/html/
+COPY news.css /usr/share/nginx/html/
+COPY news.js /usr/share/nginx/html/
 
 # CRÍTICO: Eliminar la configuración por defecto y copiar la nuestra
 RUN rm /etc/nginx/conf.d/default.conf

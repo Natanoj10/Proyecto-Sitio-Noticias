@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "bash src/scripts/startup.sh",
+    "start:prod": "node src/index.js",
+    "dev": "bash src/scripts/startup-dev.sh",
+    "seed": "node src/scripts/seed-data.js"
   },
   "keywords": [],
   "author": "",

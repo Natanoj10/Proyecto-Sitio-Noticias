@@ -10,6 +10,11 @@ services:
       - my-backend-net
     volumes:
       - mongodb:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   redisdb:
     image: redis:7.2-alpine
@@ -20,8 +25,11 @@ services:
       - "${REDIS_PORT}:${REDIS_PORT}" 
     networks:
       - my-backend-net
-    # depends_on:
-    #   - mongodb
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cassandra:
     image: cassandra:latest
@@ -33,11 +41,32 @@ services:
       - my-backend-net
     volumes:
       - cassandra-data:/var/lib/cassandra
+      - ./back/src/scripts/init-cassandra.sh:/init-cassandra.sh
+    environment:
+      - CASSANDRA_START_RPC=true
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESC KEYSPACES'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cassandra-init:
+    image: cassandra:latest
+    container_name: cassandra-init
+    networks:
+      - my-backend-net
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./back/src/scripts/init-cassandra.sh:/init-cassandra.sh
+    command: bash /init-cassandra.sh
+    restart: "no"
 
   backend:
     build: 
       context: ./back
-      dockerfile: dockerfile
+      dockerfile: dockerfile.dev
     container_name: my-backend-container
     restart: always
     env_file:
@@ -47,11 +76,23 @@ services:
     networks:
       - my-backend-net
     depends_on:
-      - mongodb
-      - redisdb
+      cassandra:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      redisdb:
+        condition: service_started
     volumes:
       - ./back:/usr/src/app
       - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/news"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   frontend:
     build:
       context: ./front
@@ -64,6 +105,8 @@ services:
       - my-backend-net
     depends_on:
       - backend
+    volumes:
+      - ./front:/usr/share/nginx/html:ro
 
 networks:
   my-backend-net:

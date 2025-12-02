@@ -10,7 +10,7 @@ const client = new Client({
 
 async function initCassandra() {
     await client.connect();
-    console.log('✅ Cassandra conectada');
+    console.log('Cassandra conectada');
 }
 
 async function logEvent({ userId = null, action, entity = null, entityId = null, details = null, ip = null }) {

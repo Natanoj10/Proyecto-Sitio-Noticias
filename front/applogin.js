@@ -66,6 +66,72 @@ function hideMessage() {
     messageBox.classList.add('hidden');
 }
 
+function displaySuccessWithNavigation(email, role) {
+    // Ocultar formulario de login
+    authView.classList.add('hidden');
+    
+    // Crear mensaje de bienvenida con opciones
+    const welcomeDiv = document.createElement('div');
+    welcomeDiv.id = 'welcome-navigation';
+    welcomeDiv.className = 'text-center py-8';
+    welcomeDiv.innerHTML = `
+        <div class="mb-6">
+            <svg class="w-20 h-20 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Bienvenido!</h2>
+            <p class="text-xl text-gray-600 mb-1">${email}</p>
+            <p class="text-lg text-indigo-600 font-semibold">Rol: ${role}</p>
+        </div>
+        
+        <div class="space-y-4 max-w-md mx-auto">
+            <p class="text-gray-700 mb-6">¿Qué deseas hacer ahora?</p>
+            
+            <a href="news.html" class="block w-full py-3 px-6 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-all font-semibold">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                </svg>
+                Ver Noticias
+            </a>
+            
+            <button onclick="showProfileView()" class="block w-full py-3 px-6 bg-gray-100 text-gray-800 rounded-lg shadow-md hover:bg-gray-200 transition-all font-semibold">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Ver Mi Perfil
+            </button>
+        </div>
+        
+        <p class="mt-6 text-sm text-gray-500">
+            Serás redirigido automáticamente a las noticias en <span id="countdown">5</span> segundos...
+        </p>
+    `;
+    
+    // Reemplazar contenido
+    const appContainer = document.getElementById('app-container');
+    appContainer.innerHTML = '';
+    appContainer.appendChild(welcomeDiv);
+    
+    // Countdown y redirección automática
+    let seconds = 5;
+    const countdownElement = document.getElementById('countdown');
+    const countdownInterval = setInterval(() => {
+        seconds--;
+        if (countdownElement) {
+            countdownElement.textContent = seconds;
+        }
+        if (seconds <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = 'news.html';
+        }
+    }, 1000);
+}
+
+function showProfileView() {
+    // Recargar la página para mostrar la vista de perfil
+    location.reload();
+}
+
 function isAdmin() {
     return localStorage.getItem('userRole') === 'admin';
 }
@@ -75,26 +141,30 @@ function updateView() {
     hideMessage();
     profileData.textContent = '';
 
+    // Handle navbar
+    const mainNavbar = document.getElementById('main-navbar');
+
     if (token) {
         authView.classList.add('hidden');
         profileView.classList.remove('hidden');
+        
+        // Show navbar
+        if (mainNavbar) {
+            mainNavbar.classList.remove('hidden');
+            // Add padding to body to account for fixed navbar
+            document.body.style.paddingTop = '4rem';
+        }
         
         const userEmail = localStorage.getItem('userEmail') || 'Usuario';
         const userRole = localStorage.getItem('userRole') || 'desconocido';
         document.getElementById('user-email-display').textContent = userEmail;
         document.getElementById('user-role-display').textContent = userRole;
 
-        console.log('Rol del usuario:', userRole); // Debug
-        console.log('¿Es admin?:', isAdmin()); // Debug
-
         // Mostrar tabs de admin si el usuario es admin
         if (isAdmin()) {
-            console.log('Mostrando tabs de admin'); // Debug
-            
             // Asegurarse de que el elemento existe antes de modificarlo
             if (adminTabs) {
                 adminTabs.classList.remove('hidden');
-                console.log('Clase hidden removida de admin-tabs');
             } else {
                 console.error('Elemento admin-tabs no encontrado');
             }
@@ -104,7 +174,6 @@ function updateView() {
                 switchTab('profile');
             }, 100);
         } else {
-            console.log('Ocultando tabs de admin'); // Debug
             if (adminTabs) {
                 adminTabs.classList.add('hidden');
             }
@@ -114,6 +183,13 @@ function updateView() {
     } else {
         authView.classList.remove('hidden');
         profileView.classList.add('hidden');
+        
+        // Hide navbar
+        const mainNavbar = document.getElementById('main-navbar');
+        if (mainNavbar) {
+            mainNavbar.classList.add('hidden');
+            document.body.style.paddingTop = '0';
+        }
     }
 }
 
@@ -132,8 +208,6 @@ function toggleAuthMode() {
 
 // --- Gestión de Tabs ---
 function switchTab(tabName) {
-    console.log('Cambiando a tab:', tabName); // Debug
-    
     // Verificar que los elementos existen
     if (!tabProfile || !tabAdmin || !sectionProfile || !sectionAdmin) {
         console.error('Elementos de tabs no encontrados');
@@ -156,12 +230,10 @@ function switchTab(tabName) {
         tabProfile.classList.add('border-indigo-600', 'text-indigo-600');
         tabProfile.classList.remove('border-transparent', 'text-gray-600');
         sectionProfile.classList.remove('hidden');
-        console.log('Tab de perfil activado');
     } else if (tabName === 'admin') {
         tabAdmin.classList.add('border-indigo-600', 'text-indigo-600');
         tabAdmin.classList.remove('border-transparent', 'text-gray-600');
         sectionAdmin.classList.remove('hidden');
-        console.log('Tab de admin activado, cargando usuarios...');
         loadUsers(); // Cargar usuarios al entrar al panel
     }
 }
@@ -236,12 +308,12 @@ function renderUsersTable(users) {
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <button onclick="openRoleModal('${user._id}', '${user.email}', '${user.role}')" 
                                 class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                🔄 Cambiar Rol
+                                Cambiar Rol
                             </button>
                             ${user._id !== currentUserId ? `
                                 <button onclick="openDeleteModal('${user._id}', '${user.email}')" 
                                     class="text-red-600 hover:text-red-900">
-                                    🗑️ Eliminar
+                                    Eliminar
                                 </button>
                             ` : '<span class="text-gray-400">Tú mismo</span>'}
                         </td>
@@ -369,7 +441,9 @@ authForm.addEventListener('submit', async (e) => {
                 localStorage.setItem('userEmail', data.user.email);
                 localStorage.setItem('userRole', data.user.role);
                 localStorage.setItem('userId', data.user.id);
-                updateView();
+                
+                // Mostrar mensaje de éxito con opciones de navegación
+                displaySuccessWithNavigation(data.user.email, data.user.role);
             } else if (isRegister) {
                 isRegister = false;
                 toggleAuthMode();
@@ -467,3 +541,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Exponer funciones globales para los botones inline
 window.openRoleModal = openRoleModal;
 window.openDeleteModal = openDeleteModal;
+window.showProfileView = showProfileView;
