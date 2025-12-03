@@ -65,7 +65,7 @@ docker compose up --build
 
 El sistema:
 1. Levanta MongoDB, Redis y Cassandra
-2. Inicializa el keyspace y tabla de Cassandra automáticamente
+2. El backend inicializa automáticamente el keyspace y tabla de Cassandra al conectarse
 3. Ejecuta el **seed automático** con datos de prueba (usuarios y noticias)
 4. Inicia el backend en modo producción
 5. Despliega el frontend con Nginx
@@ -212,9 +212,8 @@ docker exec -it my-redis-container redis-cli
 │   │   │   ├── db.config.js              # MongoDB connection
 │   │   │   └── redis.config.js           # Redis client
 │   │   ├── logger/                 # Sistema de auditoría
-│   │   │   └── logger.cassandra.js       # Logger de eventos en Cassandra
+│   │   │   └── logger.cassandra.js       # Logger de eventos en Cassandra (auto-init)
 │   │   ├── scripts/                # Scripts de inicialización
-│   │   │   ├── init-cassandra.sh         # Crear keyspace y tabla
 │   │   │   ├── seed-data.js              # Datos de prueba
 │   │   │   ├── startup.sh                # Script de inicio (producción)
 │   │   │   └── startup-dev.sh            # Script de inicio (desarrollo)
@@ -331,8 +330,8 @@ docker ps
 
 **Error: "Cassandra no inicializa"**
 ```bash
-# Verificar logs de inicialización
-docker logs cassandra-init
+# Verificar logs del backend (la inicialización se hace desde ahí)
+docker logs my-backend-container
 
 # Conectar manualmente y verificar
 docker exec -it my-cassandra-container cqlsh

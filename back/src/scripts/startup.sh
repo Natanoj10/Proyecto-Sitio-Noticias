@@ -42,22 +42,6 @@ if [ "$DATA_EXISTS" = "yes" ]; then
 else
     echo "🌱 Insertando datos de prueba..."
     node src/scripts/seed-data.js
-    
-    echo ""
-    echo "🧪 Iniciando servidor para tests..."
-    node src/index.js &
-    SERVER_PID=$!
-    
-    # Esperar a que el servidor esté listo
-    echo "⏳ Esperando a que el servidor esté listo..."
-    sleep 8
-    
-    echo "🧪 Ejecutando tests de API..."
-    bash src/scripts/test-api.sh
-    
-    # Detener el servidor de prueba
-    kill $SERVER_PID 2>/dev/null
-    wait $SERVER_PID 2>/dev/null
 fi
 
 echo ""
