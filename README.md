@@ -31,7 +31,7 @@ Sistema web completo para publicación y gestión de noticias con autenticación
 ## 📋 Requisitos Previos
 
 - Docker y Docker Compose instalados
-- Puertos disponibles: `3000`, `8080`, `27017`, `6379`, `9042`
+- Puertos disponibles: `3000`, `80`, `27017`, `6379`, `9042`
 
 ## 🚀 Instalación y Ejecución
 
@@ -75,11 +75,11 @@ Esto iniciará:
 - **Redis** en puerto 6379
 - **Cassandra** en puerto 9042
 - **Backend** en puerto 3000
-- **Frontend (Nginx)** en puerto 8080
+- **Frontend (Nginx)** en puerto 80
 
 ### 4. Acceder a la aplicación
 
-- **Frontend**: http://localhost:8080
+- **Frontend**: http://localhost
 - **API Backend**: http://localhost:3000/api
 
 ### 5. Credenciales de acceso
