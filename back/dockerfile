@@ -13,8 +13,8 @@ RUN npm install
 
 COPY . .
 
-# Dar permisos de ejecución a los scripts
-RUN chmod +x src/scripts/*.sh
+# Dar permisos de ejecución a los scripts (si existen)
+RUN chmod +x src/scripts/*.sh || true
 
 EXPOSE 3000
 
